@@ -1,0 +1,6 @@
+{
+  "name": "GL Bajaj CampusOS",
+  "description": "Next-generation academic intelligence & college ERP platform for GL Bajaj Institute of Technology and Management, Greater Noida.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
