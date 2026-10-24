@@ -1,27 +1,30 @@
 import { AppNotification } from '../types';
-import { mockNotificationsList } from '../data/mock/mockNotifications';
-import { simulateNetworkDelay } from './api';
-
-let localNotifications = [...mockNotificationsList];
+import { apiClient } from './api';
 
 export const notificationService = {
+  /**
+   * Retrieves notifications with optional category filtering from the backend.
+   */
   async getNotifications(category?: string): Promise<AppNotification[]> {
-    await simulateNetworkDelay(120);
-    if (!category || category === 'All') {
-      return [...localNotifications];
-    }
-    return localNotifications.filter((n) => n.category.toLowerCase() === category.toLowerCase());
+    const query = category && category !== 'All' ? `?category=${encodeURIComponent(category)}` : '';
+    return await apiClient<AppNotification[]>(`/notifications${query}`);
   },
 
+  /**
+   * Marks a specific notification as read in the database.
+   */
   async markAsRead(id: string): Promise<AppNotification[]> {
-    await simulateNetworkDelay(80);
-    localNotifications = localNotifications.map((n) => (n.id === id ? { ...n, read: true } : n));
-    return [...localNotifications];
+    return await apiClient<AppNotification[]>(`/notifications/${encodeURIComponent(id)}/read`, {
+      method: 'POST',
+    });
   },
 
+  /**
+   * Marks all notifications for the authenticated student as read in the database.
+   */
   async markAllAsRead(): Promise<AppNotification[]> {
-    await simulateNetworkDelay(100);
-    localNotifications = localNotifications.map((n) => ({ ...n, read: true }));
-    return [...localNotifications];
+    return await apiClient<AppNotification[]>('/notifications/read-all', {
+      method: 'POST',
+    });
   }
 };

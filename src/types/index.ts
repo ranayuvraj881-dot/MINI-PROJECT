@@ -1,5 +1,34 @@
-import { SubjectOverview } from '../data/mock/mockSubjects';
+export interface SubjectOverview {
+  code: string;
+  name: string;
+  shortName?: string;
+  credits: number;
+  faculty?: string;
+  facultyName?: string;
+  room?: string;
+  category?: 'Core Theory' | 'Professional Elective' | 'Open Elective' | 'Laboratory' | string;
+  type?: string;
+  department?: string;
+  semester?: string;
+  attendancePercentage?: number;
+  attendanceStatus?: 'Safe' | 'At Risk' | 'Critical';
+  currentScore?: number;
+  maxScore?: number;
+  gradeProjected?: string;
+  colorCode?: string;
+  description?: string;
+  syllabus?: string[];
+  units?: {
+    unitNumber: number;
+    title: string;
+    topicsCount: number;
+    pyqCount: number;
+    notesCount: number;
+  }[];
+}
+
 export type SubjectItem = SubjectOverview;
+
 
 export interface TimetableDaySchedule {
   day: string;
@@ -57,6 +86,7 @@ export interface SubjectAttendance {
   subjectCode: string;
   subjectName: string;
   facultyName: string;
+  faculty?: string;
   totalClasses: number;
   attendedClasses: number;
   percentage: number;
@@ -64,6 +94,7 @@ export interface SubjectAttendance {
   minRequired: number; // usually 75%
   classesNeededToSafe: number;
   classesCanAffordToMiss: number;
+  marginAdvice?: string;
   history: {
     date: string;
     status: 'Present' | 'Absent' | 'Late';
@@ -77,6 +108,8 @@ export interface AttendanceSummary {
   classesMissed: number;
   subjectsAtRiskCount: number;
   targetRequirement: number;
+  totalAttendedClasses?: number;
+  totalConductedClasses?: number;
   insight: {
     subject: string;
     currentPercentage: number;
@@ -258,8 +291,14 @@ export interface AdminInstitutionalStats {
   departments: number;
   activeCourses: number;
   averageCampusAttendance: number;
+  averageCollegeAttendance?: number;
   academicAverageCgpa: number;
   assignmentCompletionRate: number;
+  academicRiskDistribution?: {
+    safe: number;
+    medium: number;
+    high: number;
+  };
   insights: {
     id: string;
     title: string;

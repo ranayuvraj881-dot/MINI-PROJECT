@@ -1,30 +1,56 @@
 import { AdminInstitutionalStats, FacultyClassOverview, StudentAttentionItem } from '../types';
-import { mockAdminStats, mockDepartmentMetrics } from '../data/mock/mockAdmin';
-import { mockFacultyClasses, mockFacultyStats, mockStudentsRequiringAttention } from '../data/mock/mockFaculty';
-import { simulateNetworkDelay } from './api';
+import { apiClient } from './api';
 
 export const analyticsService = {
+  /**
+   * Retrieves faculty portal class stats, attendance, and student attention radar.
+   */
   async getFacultyOverview(): Promise<{
     classes: FacultyClassOverview[];
-    stats: typeof mockFacultyStats;
+    stats: {
+      totalStudentsTaught: number;
+      activeBatches: number;
+      averageClassAttendance: number;
+      evaluationsDue: number;
+    };
     attentionStudents: StudentAttentionItem[];
   }> {
-    await simulateNetworkDelay(200);
-    return {
-      classes: [...mockFacultyClasses],
-      stats: { ...mockFacultyStats },
-      attentionStudents: [...mockStudentsRequiringAttention]
-    };
+    return await apiClient<{
+      classes: FacultyClassOverview[];
+      stats: {
+        totalStudentsTaught: number;
+        activeBatches: number;
+        averageClassAttendance: number;
+        evaluationsDue: number;
+      };
+      attentionStudents: StudentAttentionItem[];
+    }>('/analytics/faculty');
   },
 
+  /**
+   * Retrieves administrative institutional rollups and department metrics.
+   */
   async getAdminInstitutionalData(): Promise<{
     stats: AdminInstitutionalStats;
-    departments: typeof mockDepartmentMetrics;
+    departments: {
+      code: string;
+      name: string;
+      students: number;
+      faculty: number;
+      attendanceAvg: number;
+      academicHealth: string;
+    }[];
   }> {
-    await simulateNetworkDelay(240);
-    return {
-      stats: { ...mockAdminStats },
-      departments: [...mockDepartmentMetrics]
-    };
+    return await apiClient<{
+      stats: AdminInstitutionalStats;
+      departments: {
+        code: string;
+        name: string;
+        students: number;
+        faculty: number;
+        attendanceAvg: number;
+        academicHealth: string;
+      }[];
+    }>('/analytics/admin');
   }
 };

@@ -2,10 +2,10 @@ import { UserProfile } from '../../types';
 
 export const mockCurrentStudent: UserProfile = {
   id: 'glb-stu-210192',
-  name: 'Yashvardhan Sharma',
+  name: 'Yuvraj',
   enrollmentNo: '2101920100142',
   collegeId: 'GLB21CS0892',
-  email: 'yashvardhan.sharma.cse@glbitm.ac.in',
+  email: 'yuvraj.cse@glbitm.ac.in',
   phone: '+91 98765 43210',
   role: 'student',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
