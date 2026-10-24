@@ -63,19 +63,24 @@ export const ExamsPage: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              Examination Schedules &amp; Hall Tickets
-            </h1>
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
-              Odd Sem 2026
-            </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/90 backdrop-blur-xl border border-slate-200/90 rounded-3xl p-6 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-white p-1.5 border border-slate-200 shadow-xs shrink-0">
+            <img src="/glb-logo.png" alt="GL Bajaj Crest" className="w-full h-full object-contain" />
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Official GL Bajaj Institute of Technology and Management Exam Controller notifications
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Examination Schedules &amp; Hall Tickets
+              </h1>
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
+                Odd Sem 2026
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Official GL Bajaj Institute of Technology and Management Exam Controller notifications
+            </p>
+          </div>
         </div>
 
         <button

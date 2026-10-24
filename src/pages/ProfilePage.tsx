@@ -22,12 +22,19 @@ export const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState('');
 
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
         const data = await authService.getCurrentUser();
         setProfile(data);
+        setName(data.name || '');
+        setEmail(data.email || '');
+        setPhone(data.phone || '');
       } finally {
         setLoading(false);
       }
@@ -39,11 +46,24 @@ export const ProfilePage: React.FC = () => {
     return <LoadingState message="Loading Profile Record..." subMessage="Fetching student academic registry & mentor details" />;
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setToastMessage('Profile changes saved successfully!');
-    setTimeout(() => setToastMessage(''), 3000);
+    try {
+      const updated = await authService.updateProfile({
+        name,
+        email,
+        phone,
+      });
+      setProfile(updated);
+      setToastMessage('Profile changes saved successfully to database!');
+      setTimeout(() => setToastMessage(''), 3000);
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      setToastMessage('Failed to update profile.');
+      setTimeout(() => setToastMessage(''), 3000);
+    }
   };
+
 
   return (
     <div className="space-y-6">
@@ -129,7 +149,8 @@ export const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  defaultValue={profile.name}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-blue-500"
                 />
               </div>
@@ -152,7 +173,8 @@ export const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="email"
-                  defaultValue={profile.email}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-blue-500"
                 />
               </div>
@@ -163,9 +185,11 @@ export const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="tel"
-                  defaultValue={profile.phone}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-blue-500"
                 />
+
               </div>
 
               <div>
