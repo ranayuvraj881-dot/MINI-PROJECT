@@ -145,16 +145,31 @@ export const AttendanceSimulator: React.FC<AttendanceSimulatorProps> = ({ subjec
               >
                 Attend 3, Miss 2
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setUpcomingClasses(2);
-                  setPlannedToAttend(2);
-                }}
-                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold"
-              >
-                Next 2 Classes (Reach 75%)
-              </button>
+              {currentSubject.classesNeededToSafe > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const needed = currentSubject.classesNeededToSafe;
+                    setUpcomingClasses(needed);
+                    setPlannedToAttend(needed);
+                  }}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold"
+                >
+                  Next {currentSubject.classesNeededToSafe} Classes (Reach 75%)
+                </button>
+              ) : currentSubject.classesCanAffordToMiss > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const canMiss = currentSubject.classesCanAffordToMiss;
+                    setUpcomingClasses(canMiss);
+                    setPlannedToAttend(0);
+                  }}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold"
+                >
+                  Miss Next {currentSubject.classesCanAffordToMiss} (Buffer Limit)
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

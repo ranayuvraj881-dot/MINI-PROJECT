@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../common/Modal';
 import { Sparkles, Calendar, Clock, BookOpen, AlertCircle } from 'lucide-react';
-import { mockSubjects } from '../../data/mock/mockSubjects';
+import { academicService } from '../../services/academicService';
+import { SubjectItem } from '../../types';
 
 interface StudyPlanGeneratorModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export const StudyPlanGeneratorModal: React.FC<StudyPlanGeneratorModalProps> = (
   onGenerate,
   isGenerating = false
 }) => {
+  const [subjectsList, setSubjectsList] = useState<SubjectItem[]>([]);
   const [examDate, setExamDate] = useState('2026-03-25');
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([
     'Database Management Systems',
@@ -31,6 +33,13 @@ export const StudyPlanGeneratorModal: React.FC<StudyPlanGeneratorModalProps> = (
   const [weakSubjects, setWeakSubjects] = useState<string[]>(['Database Management Systems']);
   const [hoursPerDay, setHoursPerDay] = useState<number>(2.5);
   const [preferredTime, setPreferredTime] = useState<'Morning' | 'Evening' | 'Late Night'>('Evening');
+
+  useEffect(() => {
+    academicService.getSubjects().then((subs) => {
+      setSubjectsList(subs);
+    }).catch(console.error);
+  }, []);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,8 +97,11 @@ export const StudyPlanGeneratorModal: React.FC<StudyPlanGeneratorModalProps> = (
             <BookOpen className="w-4 h-4 text-blue-600" /> Subjects in Scope
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {mockSubjects.map((sub) => {
+            {subjectsList.map((sub) => {
+
               const isChecked = selectedSubjects.includes(sub.name);
+
+
               return (
                 <button
                   type="button"

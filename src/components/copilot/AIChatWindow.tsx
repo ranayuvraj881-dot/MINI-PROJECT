@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Send,
   Sparkles,
@@ -14,10 +15,13 @@ import {
   User,
   ArrowRight,
   Search,
-  MessageSquare
+  MessageSquare,
+  ExternalLink,
+  CheckCircle2
 } from 'lucide-react';
 import { aiService, AISendMessagePayload } from '../../services/aiService';
 import { ChatMessage } from '../../types';
+import { MarkdownContent } from './MarkdownContent';
 
 interface AIChatWindowProps {
   initialPrompt?: string;
@@ -28,6 +32,7 @@ export const AIChatWindow: React.FC<AIChatWindowProps> = ({
   initialPrompt,
   initialContext = 'My Academic Data'
 }) => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState<string>(initialPrompt || '');
   const [activeContext, setActiveContext] = useState<string>(initialContext);
@@ -67,6 +72,15 @@ export const AIChatWindow: React.FC<AIChatWindowProps> = ({
     setInputText('');
     setIsLoading(true);
 
+    const tempUserMsg: ChatMessage = {
+      id: `temp-${Date.now()}`,
+      sender: 'user',
+      content: msg,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      contextApplied: activeContext,
+    };
+    setMessages((prev) => [...prev, tempUserMsg]);
+
     try {
       const payload: AISendMessagePayload = {
         message: msg,
@@ -76,8 +90,15 @@ export const AIChatWindow: React.FC<AIChatWindowProps> = ({
       await aiService.sendMessage(payload);
       const updated = await aiService.getChatHistory();
       setMessages(updated);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to send AI message:', err);
+      const errMsg: ChatMessage = {
+        id: `err-${Date.now()}`,
+        sender: 'assistant',
+        content: `**Notice**: Could not complete AI request (${err.message || 'Network error'}). Please verify your connection to backend at http://localhost:8000.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, errMsg]);
     } finally {
       setIsLoading(false);
     }
@@ -111,18 +132,25 @@ export const AIChatWindow: React.FC<AIChatWindowProps> = ({
     : messages;
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden flex flex-col h-[760px]">
+    <div className="bg-white/95 backdrop-blur-2xl border border-white shadow-[0_20px_50px_rgba(79,70,229,0.06)] rounded-3xl overflow-hidden flex flex-col h-[760px]">
       {/* Copilot Header */}
       <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-950 text-white flex items-center justify-center shadow-xs border border-blue-800">
-            <Sparkles className="w-5 h-5 text-blue-300" />
+          <div className="w-11 h-11 rounded-2xl bg-indigo-50 border border-indigo-200/80 p-1 flex items-center justify-center shadow-xs overflow-hidden shrink-0">
+            <img src="/mascot.png" alt="Campus AI Mascot" className="w-full h-full object-contain" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-base font-bold text-slate-900">Campus AI</h3>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200">
+                Assistant v2.6
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                 Academic Copilot
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Gemini Intelligence Active
               </span>
             </div>
             <p className="text-xs text-slate-500">Your personal academic copilot • GLBITM Knowledge Base</p>
@@ -190,17 +218,21 @@ export const AIChatWindow: React.FC<AIChatWindowProps> = ({
             >
               {/* Avatar */}
               <div
-                className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center text-xs font-bold ${
+                className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center text-xs font-bold overflow-hidden ${
                   isAssistant
-                    ? 'bg-blue-900 text-blue-100 border border-blue-700 shadow-xs'
+                    ? 'bg-indigo-50 border border-indigo-200/90 shadow-xs p-0.5'
                     : 'bg-slate-800 text-white'
                 }`}
               >
-                {isAssistant ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                {isAssistant ? (
+                  <img src="/mascot.png" alt="Campus AI" className="w-full h-full object-contain" />
+                ) : (
+                  <User className="w-4 h-4" />
+                )}
               </div>
 
               {/* Bubble */}
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 max-w-2xl">
                 <div
                   className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                     isAssistant
@@ -208,12 +240,11 @@ export const AIChatWindow: React.FC<AIChatWindowProps> = ({
                       : 'bg-blue-600 text-white shadow-xs font-medium'
                   }`}
                 >
-                  {/* Simple Markdown-friendly renderer */}
-                  <div className="whitespace-pre-line space-y-2">
-                    {msg.content.split('\n\n').map((paragraph, idx) => (
-                      <p key={idx}>{paragraph}</p>
-                    ))}
-                  </div>
+                  {isAssistant ? (
+                    <MarkdownContent content={msg.content} />
+                  ) : (
+                    <div className="whitespace-pre-line">{msg.content}</div>
+                  )}
 
                   {/* Context pill if assistant */}
                   {isAssistant && msg.contextApplied && (
@@ -223,6 +254,24 @@ export const AIChatWindow: React.FC<AIChatWindowProps> = ({
                     </div>
                   )}
                 </div>
+
+                {/* Reference links if present */}
+                {isAssistant && msg.referenceLinks && msg.referenceLinks.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Resources:</span>
+                    {msg.referenceLinks.map((link, lIdx) => (
+                      <button
+                        key={lIdx}
+                        onClick={() => navigate(link.url || '/notes')}
+                        className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white hover:bg-blue-50 hover:text-blue-700 text-slate-700 border border-slate-200 shadow-2xs transition-colors"
+                      >
+                        <BookOpen className="w-3 h-3 text-blue-600" />
+                        <span>{link.title}</span>
+                        <ArrowRight className="w-2.5 h-2.5 text-slate-400" />
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Suggested follow-ups */}
                 {isAssistant && msg.suggestedFollowups && (
@@ -297,7 +346,7 @@ export const AIChatWindow: React.FC<AIChatWindowProps> = ({
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder={`Ask Campus AI about ${activeContext}...`}
+            placeholder="Ask Campus AI anything — coding, general knowledge, or college studies..."
             className="flex-1 text-xs sm:text-sm px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           />
           <button
@@ -310,7 +359,7 @@ export const AIChatWindow: React.FC<AIChatWindowProps> = ({
           </button>
         </form>
         <p className="text-[10px] text-slate-400 text-center mt-2">
-          CampusOS Copilot indexes GL Bajaj Institute of Technology &amp; Management syllabus and AKTU exam datasets.
+          CampusOS Copilot answers all questions across any domain, with seamless integration for GLBITM &amp; AKTU academic data.
         </p>
       </div>
     </div>

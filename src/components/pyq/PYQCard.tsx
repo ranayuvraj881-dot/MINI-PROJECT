@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { PYQItem } from '../../types';
-import { Sparkles, CheckCircle2, Bookmark, Bot, Award, ArrowUpRight } from 'lucide-react';
+import { Sparkles, CheckCircle2, Bookmark, Bot, Award, ArrowUpRight, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface PYQCardProps {
   pyq: PYQItem;
   onPractice?: (pyq: PYQItem) => void;
   onAddToPlan?: (pyq: PYQItem) => void;
+  onDelete?: (pyq: PYQItem) => void;
+  isTeacher?: boolean;
 }
 
-export const PYQCard: React.FC<PYQCardProps> = ({ pyq, onPractice, onAddToPlan }) => {
+export const PYQCard: React.FC<PYQCardProps> = ({ pyq, onPractice, onAddToPlan, onDelete, isTeacher }) => {
   const navigate = useNavigate();
   const [isAddedToPlan, setIsAddedToPlan] = useState(false);
   const [isPracticing, setIsPracticing] = useState(false);
@@ -70,20 +72,31 @@ export const PYQCard: React.FC<PYQCardProps> = ({ pyq, onPractice, onAddToPlan }
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-end gap-2 pt-2">
-        <button
-          onClick={() => {
-            setIsPracticing(!isPracticing);
-            if (onPractice) onPractice(pyq);
-          }}
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-            isPracticing
-              ? 'bg-emerald-600 text-white border-emerald-600'
-              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          {isPracticing ? 'In Practice' : 'Practice'}
-        </button>
+      <div className="flex items-center justify-between gap-2 pt-2">
+        {isTeacher && onDelete ? (
+          <button
+            onClick={() => onDelete(pyq)}
+            className="p-1.5 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all"
+            title="Delete Question"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        ) : <div />}
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setIsPracticing(!isPracticing);
+              if (onPractice) onPractice(pyq);
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+              isPracticing
+                ? 'bg-emerald-600 text-white border-emerald-600'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            {isPracticing ? 'In Practice' : 'Practice'}
+          </button>
 
         <button
           onClick={handleAskAI}
@@ -104,7 +117,10 @@ export const PYQCard: React.FC<PYQCardProps> = ({ pyq, onPractice, onAddToPlan }
           <Bookmark className="w-3.5 h-3.5" />
           {isAddedToPlan ? 'In Study Plan' : 'Add to Plan'}
         </button>
+        </div>
       </div>
     </div>
   );
 };
+
+
